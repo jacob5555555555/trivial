@@ -13,7 +13,6 @@ instance Eq Expression where
     _           == _           = False
 
 data Equality = Equal Expression Expression
-type Substitution = (Id, Expression)
 type Substitutions = Map Id Expression
 
 unifySubs :: Maybe Substitutions -> Maybe Substitutions -> Maybe Substitutions
@@ -34,24 +33,16 @@ unify (Apply p1 a1) (Apply p2 a2) =
      in unifySubs pRes aRes
 unify _ _ = Nothing
 
-replaceUnknown :: Substitution -> Expression -> Expression
-replaceUnknown u (Apply p a) =
-    (Apply (replaceUnknown u p) (replaceUnknown u a))
-replaceUnknown (a, res) (Unknown b)
-    | a == b
-    = res
-replaceUnknown _ ex = ex
+replaceUnknowns :: Substitutions -> Expression -> Expression
+replaceUnknowns subs (Apply p a) = 
+    (Apply (replaceUnknowns subs p) (replaceUnknowns subs a))
+replaceUnknowns subs (Unknown u)
+    | Just replacement <- Map.lookup u subs
+    = replacement
+replaceUnknowns _ ex = ex
 
 reduce :: Equality -> Expression -> Expression
-reduce (Equal a res) b
-    | a == b
-    = res
-reduce (Equal (Unknown a1) res) ex =
-    replaceUnknown (a1, ex) res
-reduce (Equal (Apply p1 a1) res) (Apply p2 a2)
-    | p1 == p2
-    = reduce newEquality a2 where
-        newEquality = Equal a1 res
-reduce eq (Apply a b) =
-    (Apply (reduce eq a) (reduce eq b))
+reduce (Equal def res) ex
+  | Just subs <- unify def ex
+  = replaceUnknowns subs res
 reduce _ ex = ex
