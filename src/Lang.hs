@@ -61,6 +61,10 @@ reduce (Equal def res) ex
 reduce _ ex = ex
 
 reduceProg :: Program -> Expression -> Expression
+--reduceProg prog (Apply p a) = Apply (reduceProg prog p) (reduceProg prog a)
+reduceProg prog (Apply p a)
+    | (reduceProg prog p) /= p || (reduceProg prog a) /= a
+    = reduceProg prog $ (Apply (reduceProg prog  p) (reduceProg prog  a))
 reduceProg prog ex
     | Just equality <- Map.lookup ex prog 
     = reduceProg prog $ reduce equality ex

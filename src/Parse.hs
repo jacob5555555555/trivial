@@ -45,5 +45,7 @@ tokenize (OpenParen:rest) = StartSub : tokenize rest
 tokenize (CloseParen:rest) = EndSub : tokenize rest
 tokenize (Whitespace:rest) = tokenize rest
 
-parseTokens :: [Token] -> Expression
+data AST = Name String | Sub [AST]
+
+parseTokens :: [Token] -> [AST]
 parseTokens = undefined
