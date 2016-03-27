@@ -83,10 +83,14 @@ reduceProg :: Program -> Expression -> Expression
 reduceProg prog (Apply p a)
     | (reduceProg prog p) /= p || (reduceProg prog a) /= a
     = reduceProg prog $ (Apply (reduceProg prog  p) (reduceProg prog  a))
-reduceProg prog ex
-    | Just equality <- getEquality prog ex
-    = reduceProg prog $ reduce equality ex
-reduceProg _ ex = ex
+--reduceProg prog ex
+--    | Just equality <- getEquality prog ex
+--    = reduceProg prog $ reduce equality ex
+--reduceProg _ ex = ex
+reduceProg prog ex =
+    let newEx = Prelude.foldl (\ex eq -> reduce eq ex) ex (reverse $ Map.elems prog)
+    in if newEx == ex then newEx else reduceProg prog newEx
+--NOTE: this bit is super inefficient, but works. Need to find a more efficient way of storing deifinitions.
 
 makeProg :: [Equality] -> Program
 makeProg eqs =

@@ -2,6 +2,8 @@ module Main where
 
 import Data.List as List
 import Data.Map as Map
+--import System.Console.ANSI
+import System.IO
 
 import Lang
 import Test
@@ -15,7 +17,7 @@ main = do runProg emptyNameMap Map.empty
 
 runProg :: NameMap -> Program -> IO Program
 runProg names prog= do
-    input <- prompt names
+    input <- prompt names prog
     case input of
       Left (newNames, eq) ->
           runProg newNames (addToProg eq prog)
@@ -24,19 +26,20 @@ runProg names prog= do
              runProg newNames prog
 
 
-prompt :: NameMap -> IO (Either (NameMap, Equality) (NameMap, Expression))
-prompt names = do
+prompt :: NameMap -> Program -> IO (Either (NameMap, Equality) (NameMap, Expression))
+prompt names prog= do
     putStr "> "
+    hFlush stdout
     a <- getLine
-    let res = evalPrompt names a
+    let res = evalPrompt names prog a
     case res of
       Left err -> do putStrLn $ "Error: " ++ err
-                     prompt names
+                     prompt names prog
       Right (Right (newNames, ex)) -> return $ Right (newNames, ex)
       Right (Left (newNames, eq)) -> return $ Left (newNames, eq)
 
-evalPrompt :: NameMap -> String -> Either String (Either (NameMap, Equality)  (NameMap, Expression))
-evalPrompt names s =
+evalPrompt :: NameMap -> Program -> String -> Either String (Either (NameMap, Equality)  (NameMap, Expression))
+evalPrompt names prog s =
     case splitBy '=' s of
       Nothing -> case parse names s of
                    Left err -> Left err
@@ -47,7 +50,9 @@ evalPrompt names s =
                          Right (names1, e1) ->
                              case parse names1 s2 of
                                Left err -> Left err
-                               Right (names2, e2) -> Right (Left (names2, Equal e1 e2))
+                               Right (names2, e2) -> Right (Left (names2, Equal reducedE1 reducedE2)) where
+                                   reducedE1 = reduceProg prog e1
+                                   reducedE2 = reduceProg prog e2
 
 
 
