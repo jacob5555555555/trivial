@@ -31,9 +31,9 @@ eq = Equal
 
 prog :: Program
 prog = makeProg [
-                    (eq (ap (v "num") (v "Z")) (v "True")),
-                    (eq (ap (v "num") (ap (v "S") (u "a"))) (ap (v "num") (u "a"))),
-
                     (eq (ap (v "not") (v "True")) (v "False")),
-                    (eq (ap (v "not") (v "False")) (v "True"))
+                    (eq (ap (v "not") (v "False")) (v "True")),
+
+                    (eq (ap (v "f") (v "g")) (v "h")),
+                    (eq (ap (v "f") (u "a")) (u "a"))
                 ]
