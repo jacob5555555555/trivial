@@ -109,8 +109,6 @@ data NameMap = NameMap (Association String Id) Id deriving (Show)
 emptyNameMap :: NameMap
 emptyNameMap = NameMap Util.empty 0
 
---combineNameMaps :: NameMap -> NameMap -> NameMap
-
 findOrMake :: NameMap -> String -> (NameMap, Id)
 findOrMake names@(NameMap ass _) s
     | (Just b) <- lookupA s ass

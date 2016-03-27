@@ -10,19 +10,21 @@ instance Eq Expression where
     (Value a)   == (Value b)   = a == b
     (Apply a b) == (Apply c d) = (a == c) && (b == d)
     (Unknown a) == (Unknown b) = a == b
-    (Unknown _) == _           = True
     _           == _           = False
 
+-- Unknown < Value < Apply
 instance Ord Expression where
     compare (Value a) (Value b) = compare a b
     compare (Apply a1 b1) (Apply a2 b2) =
         let aVal = compare a1 a2
         in if aVal /= EQ then aVal
                          else compare b1 b2
-    compare (Unknown _) _ = EQ
-    compare _ (Unknown _) = EQ
-    compare (Apply _ _) (Value _) = GT
-    compare (Value _) (Apply _ _) = LT
+    compare a b = compare (getRanking a) (getRanking b)
+
+getRanking :: Expression -> Integer
+getRanking (Unknown _) = 0
+getRanking (Value _) = 1
+getRanking (Apply _ _) = 2
 
 data Equality = Equal Expression Expression deriving (Show)
 type Substitutions = Map Id Expression

@@ -24,6 +24,3 @@ lookupB b (Association _ bToa) = Map.lookup b bToa
 
 union :: Ord a => Ord b => Association a b -> Association a b -> Association a b
 union (Association a1 b1) (Association a2 b2) = (Association (Map.union a1 a2) (Map.union b1 b2))
-
---map :: Ord a => Ord b => Association a b -> Association a b -> Association a b
---map (Association a1 b2) (Association a2 b2) = Association ()
