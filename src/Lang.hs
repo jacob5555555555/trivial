@@ -21,6 +21,16 @@ instance Ord Expression where
                          else compare b1 b2
     compare a b = compare (getRanking a) (getRanking b)
 
+compareExpressions :: Expression -> Expression -> Bool
+compareExpressions a@(Unknown _) b@(Unknown _) = a == b
+compareExpressions (Apply a b) (Apply c d) =
+    compareExpressions a c && compareExpressions b d
+compareExpressions (Unknown _) _ = True
+compareExpressions _ (Unknown _) = True
+compareExpressions a b = a == b
+
+
+
 getRanking :: Expression -> Integer
 getRanking (Unknown _) = 0
 getRanking (Value _) = 1
@@ -62,13 +72,19 @@ reduce (Equal def res) ex
     = replaceUnknowns subs res
 reduce _ ex = ex
 
+getEquality :: Program -> Expression -> Maybe Equality
+getEquality prog ex =
+    let matches = Map.elems $ Map.filterWithKey (\k _ -> compareExpressions ex k) prog
+    in case matches of
+         [] -> Nothing
+         (m:_) -> Just m
+
 reduceProg :: Program -> Expression -> Expression
---reduceProg prog (Apply p a) = Apply (reduceProg prog p) (reduceProg prog a)
 reduceProg prog (Apply p a)
     | (reduceProg prog p) /= p || (reduceProg prog a) /= a
     = reduceProg prog $ (Apply (reduceProg prog  p) (reduceProg prog  a))
 reduceProg prog ex
-    | Just equality <- Map.lookup ex prog 
+    | Just equality <- getEquality prog ex
     = reduceProg prog $ reduce equality ex
 reduceProg _ ex = ex
 
