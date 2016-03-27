@@ -96,10 +96,10 @@ parseAST names (Sub [a,b]) =
             Left err -> Left err
             Right (names2, eb) ->
                 return (names2, Apply ea eb)
-                
 parseAST names (Sub (a:b:asts)) =
     parseAST names (Sub ((Sub [a,b]) : asts))
 parseAST names (Sub [a]) = Left "cant have Sub with only one element"
+parseAST names (Sub []) = Left "cant have Sub with no elements"
 
 
 
