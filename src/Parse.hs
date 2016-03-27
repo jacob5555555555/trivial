@@ -76,7 +76,6 @@ parseTokens toks =
             let (sub, rest) = getSubExpr toks
             in (:) <$>  (fmap Sub (parseTokensHelper sub)) <*> (parseTokensHelper rest)
         parseTokensHelper (errTok:toks) = Left ((show errTok) ++ " caused an error")
-     --in (Sub) <$> (parseTokensHelper toks)
      in case parseTokensHelper toks of
           Left err -> Left err
           Right ([a]) -> return a

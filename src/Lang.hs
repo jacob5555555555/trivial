@@ -76,3 +76,9 @@ makeProg :: [Equality] -> Program
 makeProg eqs =
     let toKeyValue eq@(Equal a b) = (a, eq)
     in Map.fromList $ Prelude.map toKeyValue eqs
+
+addToProg :: Equality -> Program -> Program
+addToProg eq prog =
+    let toKeyValue eq@(Equal a b) = (a, eq)
+        (k, v) = toKeyValue eq
+    in Map.insert k v prog
