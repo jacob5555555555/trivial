@@ -12,7 +12,7 @@ import Parse
 import Print
 
 main :: IO()
-main = do runProg emptyNameMap Map.empty
+main = do runProg emptyNameMap []
           return ()
 
 runProg :: NameMap -> Program -> IO Program
