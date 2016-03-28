@@ -34,8 +34,7 @@ main = do args <- Env.getArgs
 parseFile :: String -> IO (Either String (NameMap, Program))
 parseFile name = do
     contents <- readFile name
-    let progLines = lines contents
-        
+    let progLines = Prelude.filter (/= "") $ lines contents
     return $ foldM addLineToProg (emptyNameMap, emptyProgram) progLines
 
 
