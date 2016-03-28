@@ -22,7 +22,7 @@ synopsis:            A simple language implemented in Haskell
 -- license:             
 
 -- The file containing the license text.
-license-file:        LICENSE
+--license-file:        LICENSE
 
 -- The package author(s).
 author:              Jacob Prinz

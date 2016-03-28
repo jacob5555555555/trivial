@@ -4,6 +4,8 @@ import Data.List as List
 import Data.Map as Map
 --import System.Console.ANSI
 import System.IO
+import Control.Monad
+import System.Environment as Env
 
 import Lang
 import Test
@@ -12,8 +14,39 @@ import Parse
 import Print
 
 main :: IO()
-main = do runProg emptyNameMap []
+main = do args <- Env.getArgs
+          case args of
+            [] -> do
+                _ <- runProg emptyNameMap emptyProgram
+                return ()
+            [filename] -> do
+                fileRes <- parseFile filename
+                case fileRes of
+                  Left err -> putStrLn $ "Error parsing file " ++ filename ++ ": " ++ err
+                  Right (names, prog) -> do
+                      runProg names prog
+                      return ()
+            _ -> do
+                name <- Env.getProgName
+                putStrLn ("usage: " ++ name ++ " [filename]")
           return ()
+
+parseFile :: String -> IO (Either String (NameMap, Program))
+parseFile name = do
+    contents <- readFile name
+    let progLines = lines contents
+        
+    return $ foldM addLineToProg (emptyNameMap, emptyProgram) progLines
+
+
+addLineToProg :: (NameMap, Program) -> String -> Either String (NameMap, Program)
+addLineToProg (names, prog) input =
+    case evalPrompt names prog input of
+      Left err -> Left err
+      Right (Right (newNames, ex)) -> Left ("Can't have plain expression in file: " ++ printEx newNames ex)
+      Right (Left (newNames, eq)) -> Right (newNames, addToProg eq prog)
+
+
 
 runProg :: NameMap -> Program -> IO Program
 runProg names prog= do

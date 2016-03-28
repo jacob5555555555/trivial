@@ -30,6 +30,9 @@ data Equality = Equal Expression Expression deriving (Show)
 type Substitutions = Map Id Expression
 type Program = [Equality]
 
+emptyProgram :: Program
+emptyProgram = []
+
 unifySubs :: Maybe Substitutions -> Maybe Substitutions -> Maybe Substitutions
 unifySubs (Just m1) (Just m2) =
     let intersections = Map.intersectionWith (==) m1 m2

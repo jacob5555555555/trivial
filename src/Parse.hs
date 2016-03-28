@@ -8,7 +8,7 @@ import Util
 data CharVal = NameChar Char | OpenParen | CloseParen | Whitespace  deriving (Show)
 
 nameChars :: String
-nameChars = ['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] ++ ['_']
+nameChars = ['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] ++ "'_+-=*/'[],"
 
 charToVal :: Char -> Either String CharVal
 charToVal ')' = return CloseParen
