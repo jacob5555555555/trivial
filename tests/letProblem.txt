@@ -1,0 +1,14 @@
+g _a _b = f _a _b
+
+f _a _a = same
+f _a _b = different
+
+this works now that g is defined before f
+
+
+the problem is that f is actually passed the Unknowns _a and _b instead of the things that get substituted for them.
+
+intended reduction sequence:
+g t y (_a is t and _b is y in definition of g _a _b)
+f t y (_a is t and _b is y in second definition of f)
+different

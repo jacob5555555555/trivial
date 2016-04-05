@@ -84,7 +84,9 @@ evalPrompt names prog s =
                                Left err -> Left err
                                Right (names2, e2) -> Right (Left (names2, Equal reducedE1 reducedE2)) where
                                    reducedE1 = reduceProg prog e1
-                                   reducedE2 = reduceProg prog e2
+                                   --the following line was causing Unknowns to be reduced by accident. For now, no reduction of right side.
+                                   --reducedE2 = reduceProg prog e2
+                                   reducedE2 = e2
 
 
 

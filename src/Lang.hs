@@ -71,7 +71,7 @@ reduceProg prog (Apply p a)
     = reduceProg prog $ (Apply (reduceProg prog  p) (reduceProg prog  a))
 reduceProg prog ex =
     let newEx = Prelude.foldl (\ex eq -> reduce eq ex) ex prog
-    in if newEx == ex then newEx else reduceProg prog newEx
+    in  if newEx == ex then newEx else reduceProg prog newEx
 --NOTE: this bit is super inefficient, but works. Need to find a more efficient way of storing deifinitions.
 
 makeProg :: [Equality] -> Program
