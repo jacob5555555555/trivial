@@ -36,7 +36,7 @@ emptyProgram = []
 unifySubs :: Maybe Substitutions -> Maybe Substitutions -> Maybe Substitutions
 unifySubs (Just m1) (Just m2) =
     let intersections = Map.intersectionWith (==) m1 m2
-        hasConflict = False `elem` (elems intersections)
+        hasConflict = False `elem` elems intersections
     in if hasConflict then Nothing
                       else Just $ m1 `Map.union` m2
 unifySubs _ _ = Nothing
@@ -52,8 +52,8 @@ unify (Apply p1 a1) (Apply p2 a2) =
 unify _ _ = Nothing
 
 replaceUnknowns :: Substitutions -> Expression -> Expression
-replaceUnknowns subs (Apply p a) = 
-    (Apply (replaceUnknowns subs p) (replaceUnknowns subs a))
+replaceUnknowns subs (Apply p a) =
+    Apply (replaceUnknowns subs p) (replaceUnknowns subs a)
 replaceUnknowns subs (Unknown u)
     | Just replacement <- Map.lookup u subs
     = replacement
@@ -67,10 +67,10 @@ reduce _ ex = ex
 
 reduceProg :: Program -> Expression -> Expression
 reduceProg prog (Apply p a)
-    | (reduceProg prog p) /= p || (reduceProg prog a) /= a
-    = reduceProg prog $ (Apply (reduceProg prog  p) (reduceProg prog  a))
+    | reduceProg prog p /= p || reduceProg prog a /= a
+    = reduceProg prog $ Apply (reduceProg prog  p) (reduceProg prog  a)
 reduceProg prog ex =
-    let newEx = Prelude.foldl (\ex eq -> reduce eq ex) ex prog
+    let newEx = Prelude.foldl (flip reduce) ex prog
     in  if newEx == ex then newEx else reduceProg prog newEx
 --NOTE: this bit is super inefficient, but works. Need to find a more efficient way of storing deifinitions.
 

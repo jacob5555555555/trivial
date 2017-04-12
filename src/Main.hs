@@ -42,8 +42,9 @@ addLineToProg :: (NameMap, Program) -> String -> Either String (NameMap, Program
 addLineToProg (names, prog) input =
     case evalPrompt names prog input of
       Left err -> Left err
-      Right (Right (newNames, ex)) -> Left ("Can't have plain expression in file: " ++ printEx newNames ex)
-      Right (Left (newNames, eq)) -> Right (newNames, addToProg eq prog)
+      Right Nothing -> Right (names, prog)
+      Right (Just (Right (newNames, ex))) -> Left ("Can't have plain expression in file: " ++ printEx newNames ex)
+      Right (Just (Left (newNames, eq))) -> Right (newNames, addToProg eq prog)
 
 
 
@@ -67,22 +68,27 @@ prompt names prog= do
     case res of
       Left err -> do putStrLn $ "Error: " ++ err
                      prompt names prog
-      Right (Right (newNames, ex)) -> return $ Right (newNames, ex)
-      Right (Left (newNames, eq)) -> return $ Left (newNames, eq)
+      Right Nothing -> prompt names prog
+      Right (Just (Right (newNames, ex))) -> return $ Right (newNames, ex)
+      Right (Just (Left (newNames, eq))) -> return $ Left (newNames, eq)
 
-evalPrompt :: NameMap -> Program -> String -> Either String (Either (NameMap, Equality)  (NameMap, Expression))
+type LineData = (Either (NameMap, Equality)  (NameMap, Expression))
+
+evalPrompt :: NameMap -> Program -> String -> Either String (Maybe LineData)
 evalPrompt names prog s =
     case splitBy '=' s of
       Nothing -> case parse names s of
                    Left err -> Left err
-                   Right res -> Right (Right res)
+                   Right Nothing -> Right Nothing
+                   Right (Just res) -> Right (Just (Right res))
 
       Just (s1, s2) -> case parse names s1 of
                          Left err -> Left err
-                         Right (names1, e1) ->
+                         Right Nothing -> undefined
+                         Right (Just (names1, e1)) ->
                              case parse names1 s2 of
                                Left err -> Left err
-                               Right (names2, e2) -> Right (Left (names2, Equal reducedE1 reducedE2)) where
+                               Right (Just (names2, e2)) -> Right $ Just (Left (names2, Equal reducedE1 reducedE2)) where
                                    reducedE1 = reduceProg prog e1
                                    --the following line was causing Unknowns to be reduced by accident. For now, no reduction of right side.
                                    --reducedE2 = reduceProg prog e2
@@ -93,7 +99,7 @@ evalPrompt names prog s =
 
 splitBy :: Eq a => a -> [a] -> Maybe ([a], [a])
 splitBy e l =
-    let splitWithExtra = fmap (\i -> List.splitAt i l) (List.elemIndex e l)
+    let splitWithExtra = fmap (`List.splitAt` l) (List.elemIndex e l)
         removeExtra :: ([a], [b]) -> ([a], [b])
         removeExtra (a, _:b) = (a, b)
     in fmap removeExtra splitWithExtra
